@@ -19,17 +19,21 @@ PART 2: Pre-processing
 import pandas as pd
 
 def preprocessing():
+    # Load datasets
     pred_universe_df = pd.read_csv('./data/pred_universe_raw.csv')
     arrest_events_df = pd.read_csv('./data/arrest_events_raw.csv')
 
-    # Perform preprocessing
+    # Convert date columns to datetime
+    pred_universe_df['arrest_date_univ'] = pd.to_datetime(pred_universe_df['arrest_date_univ'])
+    arrest_events_df['arrest_date_event'] = pd.to_datetime(arrest_events_df['arrest_date_event'])
+
+    # Perform a full outer join on 'person_id'
     df_arrests = pd.merge(pred_universe_df, arrest_events_df, on='person_id', how='outer', suffixes=('_universe', '_event'))
 
-    df_arrests['arrest_date_univ'] = pd.to_datetime(df_arrests['arrest_date_univ'])
-    df_arrests['arrest_date_event'] = pd.to_datetime(df_arrests['arrest_date_event'])
-
+    # Create column 'y' for felony rearrest within the next year
     df_arrests['y'] = df_arrests.apply(
         lambda row: 1 if (
+            pd.notnull(row['arrest_date_event']) and
             row['arrest_date_event'] > row['arrest_date_univ'] and
             row['arrest_date_event'] <= row['arrest_date_univ'] + pd.DateOffset(days=365) and
             row['charge_event'] == 'felony'
@@ -37,7 +41,10 @@ def preprocessing():
         axis=1
     )
 
+    # Create column 'current_charge_felony'
     df_arrests['current_charge_felony'] = df_arrests['charge_universe'].apply(lambda x: 1 if x == 'felony' else 0)
+
+    # Create column 'num_fel_arrests_last_year'
     df_arrests['num_fel_arrests_last_year'] = df_arrests.apply(
         lambda row: df_arrests[
             (df_arrests['person_id'] == row['person_id']) &
@@ -48,6 +55,7 @@ def preprocessing():
         axis=1
     )
 
+    # Print statistics
     share_felony_rearrested = df_arrests['y'].mean()
     print(f"What share of arrestees in the df_arrests table were rearrested for a felony crime in the next year? {share_felony_rearrested:.4f}")
 
@@ -57,9 +65,11 @@ def preprocessing():
     avg_felony_arrests_last_year = df_arrests['num_fel_arrests_last_year'].mean()
     print(f"What is the average number of felony arrests in the last year? {avg_felony_arrests_last_year:.2f}")
 
+    # Save to CSV
     df_arrests.to_csv('./data/df_arrests.csv', index=False)
 
     return df_arrests
+
 
 
 
