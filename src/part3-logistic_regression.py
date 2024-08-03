@@ -17,9 +17,34 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.model_selection import StratifiedKFold as KFold_strat
-from sklearn.linear_model import LogisticRegression as lr
+from sklearn.linear_model import LogisticRegression
 
 
 # Your code here
 
+df_arrests = pd.read_csv('./data/df_arrests.csv')
+df_arrests_train, df_arrests_test = train_test_split(df_arrests, test_size=0.3, shuffle=True, stratify=df_arrests['y'])
 
+
+features = ['pred_universe', 'num_fel_arrests_last_year']
+X_train = df_arrests_train[features]
+y_train = df_arrests_train['y']
+X_test = df_arrests_test[features]
+y_test = df_arrests_test['y']
+
+param_grid = {'C': [0.01, 0.1, 1, 10, 100]}
+
+
+lr_model = LogisticRegression()
+gs_cv = GridSearchCV(lr_model, param_grid, cv=5)
+gs_cv.fit(X_train, y_train)
+
+optimal_C = gs_cv.best_params_['C']
+print(f"What was the optimal value for C? {optimal_C}")
+print(f"Did it have the most or least regularization? Or in the middle? {'least' if optimal_C == max(param_grid['C']) else 'most' if optimal_C == min(param_grid['C']) else 'middle'}")
+
+
+df_arrests_test['pred_lr'] = gs_cv.predict(X_test)
+
+
+df_arrests_test.to_csv('./data/df_arrests_test_lr.csv', index=False)
