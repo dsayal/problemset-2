@@ -18,16 +18,26 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
 def logistic_regression(df_arrests):
+    # Ensure the features are correctly defined
+    # Ensure `pred_universe` is actually a column in the df_arrests or update this accordingly
+    if 'pred_universe' not in df_arrests.columns:
+        print("Error: 'pred_universe' column is not present in the dataframe.")
+        return
+
+    # Define features and target variable
     X = df_arrests[['pred_universe', 'num_fel_arrests_last_year']]
     y = df_arrests['y']
 
+    # Split the data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, shuffle=True, stratify=y, random_state=42
     )
 
+    # Define parameter grid for GridSearchCV
     param_grid = {'C': [0.1, 1, 10]}
-    lr_model = LogisticRegression()
+    lr_model = LogisticRegression(max_iter=1000)  # Ensure convergence
 
+    # Initialize GridSearchCV
     gs_cv = GridSearchCV(
         estimator=lr_model,
         param_grid=param_grid,
@@ -36,8 +46,10 @@ def logistic_regression(df_arrests):
         n_jobs=-1
     )
 
+    # Fit GridSearchCV
     gs_cv.fit(X_train, y_train)
 
+    # Optimal C value and regularization
     optimal_C = gs_cv.best_params_['C']
     print(f"What was the optimal value for C? {optimal_C}")
 
@@ -48,14 +60,20 @@ def logistic_regression(df_arrests):
     else:
         print("The optimal value for C is in the middle range of regularization.")
 
+    # Predict on the test set
     y_pred = gs_cv.predict(X_test)
+
+    # Add predictions to the dataframe
     df_arrests.loc[X_test.index, 'pred_lr'] = y_pred
 
+    # Print accuracy
     accuracy = accuracy_score(y_test, y_pred)
     print(f"Accuracy on test set: {accuracy:.4f}")
 
+    # Save results to CSV
     df_arrests.to_csv('./data/df_arrests_with_lr_predictions.csv', index=False)
 
     return df_arrests
+
 
 
