@@ -14,6 +14,8 @@ Do both metrics agree that one model is more accurate than the other? Print this
 
 # Import any further packages you may need for PART 5
 from sklearn.calibration import calibration_curve
+from sklearn.metrics import precision_score, roc_auc_score
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
