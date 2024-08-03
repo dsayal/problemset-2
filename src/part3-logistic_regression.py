@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.model_selection import StratifiedKFold as KFold_strat
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression as lr
 
 
 # Your code here
@@ -35,7 +35,7 @@ y_test = df_arrests_test['y']
 param_grid = {'C': [0.01, 0.1, 1, 10, 100]}
 
 
-lr_model = LogisticRegression()
+lr_model = lr()
 gs_cv = GridSearchCV(lr_model, param_grid, cv=5)
 gs_cv.fit(X_train, y_train)
 
