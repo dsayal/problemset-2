@@ -13,38 +13,74 @@ PART 3: Logistic Regression
 '''
 
 # Import any further packages you may need for PART 3
+# logistic_regression.py
+
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.model_selection import StratifiedKFold as KFold_strat
-from sklearn.linear_model import LogisticRegression as lr
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
+class LogisticRegressionModel:
+    def train(self, df_arrests):
+        # Split the data into training and test sets
+        X = df_arrests[['pred_universe', 'num_fel_arrests_last_year']]
+        y = df_arrests['y']
+        
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.3, shuffle=True, stratify=y, random_state=42
+        )
+        
+        # Define the features
+        features = ['pred_universe', 'num_fel_arrests_last_year']
+        
+        # Define the parameter grid for GridSearchCV
+        param_grid = {'C': [0.1, 1, 10]}  # Example values for C, adjust as needed
 
-# Your code here
+        # Initialize the Logistic Regression model
+        lr_model = LogisticRegression()
 
-df_arrests = pd.read_csv('./data/df_arrests.csv')
-df_arrests_train, df_arrests_test = train_test_split(df_arrests, test_size=0.3, shuffle=True, stratify=df_arrests['y'])
+        # Initialize GridSearchCV with 5-fold cross-validation
+        gs_cv = GridSearchCV(
+            estimator=lr_model, 
+            param_grid=param_grid, 
+            cv=5, 
+            scoring='accuracy',
+            n_jobs=-1
+        )
 
+        # Fit the GridSearchCV model
+        gs_cv.fit(X_train, y_train)
 
-features = ['pred_universe', 'num_fel_arrests_last_year']
-X_train = df_arrests_train[features]
-y_train = df_arrests_train['y']
-X_test = df_arrests_test[features]
-y_test = df_arrests_test['y']
+        # Optimal value for C
+        optimal_C = gs_cv.best_params_['C']
+        print(f"What was the optimal value for C? {optimal_C}")
+        
+        # Print if the optimal C has the most, least or middle regularization
+        if optimal_C == max(param_grid['C']):
+            print("The optimal value for C has the least regularization.")
+        elif optimal_C == min(param_grid['C']):
+            print("The optimal value for C has the most regularization.")
+        else:
+            print("The optimal value for C is in the middle range of regularization.")
 
-param_grid = {'C': [0.01, 0.1, 1, 10, 100]}
+        # Predict on the test set
+        y_pred = gs_cv.predict(X_test)
+        df_arrests.loc[X_test.index, 'pred_lr'] = y_pred
+        
+        # Calculate and print accuracy for sanity check
+        accuracy = accuracy_score(y_test, y_pred)
+        print(f"Accuracy on test set: {accuracy:.4f}")
 
+        # Save results to CSV for use in PART 4 and PART 5
+        df_arrests.to_csv('./data/df_arrests_with_lr_predictions.csv', index=False)
 
-lr_model = lr()
-gs_cv = GridSearchCV(lr_model, param_grid, cv=5)
-gs_cv.fit(X_train, y_train)
+        return X_test, y_test, df_arrests
 
-optimal_C = gs_cv.best_params_['C']
-print(f"What was the optimal value for C? {optimal_C}")
-print(f"Did it have the most or least regularization? Or in the middle? {'least' if optimal_C == max(param_grid['C']) else 'most' if optimal_C == min(param_grid['C']) else 'middle'}")
+if __name__ == "__main__":
+    # Example usage for testing purposes
+    df_arrests = pd.read_csv('./data/df_arrests.csv')
+    lr_model = LogisticRegressionModel()
+    X_test, y_test, df_arrests = lr_model.train(df_arrests)
+    print("Training and predictions complete.")
 
-
-df_arrests_test['pred_lr'] = gs_cv.predict(X_test)
-
-
-df_arrests_test.to_csv('./data/df_arrests_test_lr.csv', index=False)
