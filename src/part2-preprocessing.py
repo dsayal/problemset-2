@@ -18,9 +18,32 @@ PART 2: Pre-processing
 
 # import the necessary packages
 
-
+import pandas as pd
 
 # Your code here
 
+#load data 
+pred_universe_raw = pd.read_csv('./data/pred_universe_raw.csv')
+arrest_events_raw = pd.read_csv('./data/arrest_events_raw.csv')
+
+df_arrests = pd.merge(pred_universe_raw, arrest_events_raw, on='person_id', how='outer')
+
+df_arrests['y'] = (df_arrests['arrest_date_event'] <= (df_arrests['arrest_date_univ'] + pd.DateOffset(days=365))).astype(int)
+share_arrested = df_arrests['y'].mean()
+print(f"What share of arrestees in the df_arrests table were rearrested for a felony crime in the next year? {share_arrested}")
+
+df_arrests['current_charge_felony'] = df_arrests['charge'].apply(lambda x: 1 if 'felony' in x.lower() else 0)
+share_felony = df_arrests['current_charge_felony'].mean()
+print(f"What share of current charges are felonies? {share_felony}")
+
+
+df_arrests['num_fel_arrests_last_year'] = df_arrests.apply(lambda row: ((df_arrests['person_id'] == row['person_id']) & 
+                                                                        (df_arrests['arrest_date_event'] > (row['arrest_date_univ'] - pd.DateOffset(days=365))) & 
+                                                                        (df_arrests['arrest_date_event'] < row['arrest_date_univ'])).sum(), axis=1)
+average_felony_arrests = df_arrests['num_fel_arrests_last_year'].mean()
+print(f"What is the average number of felony arrests in the last year? {average_felony_arrests}")
+
+
+df_arrests.to_csv('./data/df_arrests.csv', index=False)
 
 
