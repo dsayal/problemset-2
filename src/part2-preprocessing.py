@@ -16,68 +16,50 @@ PART 2: Pre-processing
 - Return `df_arrests` for use in main.py for PART 3; if you can't figure this out, save as a .csv in `data/` and read into PART 3 in main.py
 '''
 
-# preprocessing.py
-
 import pandas as pd
 
-class Preprocessing:
-    def process(self, pred_universe_df, arrest_events_df):
-        # Perform a full outer join/merge on 'person_id'
-        df_arrests = pd.merge(pred_universe_df, arrest_events_df, on='person_id', how='outer', suffixes=('_universe', '_event'))
-
-        # Convert date columns to datetime
-        df_arrests['arrest_date_univ'] = pd.to_datetime(df_arrests['arrest_date_univ'])
-        df_arrests['arrest_date_event'] = pd.to_datetime(df_arrests['arrest_date_event'])
-
-        # Create 'y' column
-        df_arrests['y'] = df_arrests.apply(
-            lambda row: 1 if (
-                row['arrest_date_event'] > row['arrest_date_univ'] and
-                row['arrest_date_event'] <= row['arrest_date_univ'] + pd.DateOffset(days=365) and
-                row['charge_event'] == 'felony'
-            ) else 0,
-            axis=1
-        )
-
-        # Calculate the share of arrestees rearrested for a felony crime in the next year
-        share_felony_rearrested = df_arrests['y'].mean()
-        print(f"What share of arrestees in the df_arrests table were rearrested for a felony crime in the next year? {share_felony_rearrested:.4f}")
-
-        # Create 'current_charge_felony' feature
-        df_arrests['current_charge_felony'] = df_arrests['charge_universe'].apply(lambda x: 1 if x == 'felony' else 0)
-
-        # Calculate the share of current charges that are felonies
-        share_felony_current_charge = df_arrests['current_charge_felony'].mean()
-        print(f"What share of current charges are felonies? {share_felony_current_charge:.4f}")
-
-        # Create 'num_fel_arrests_last_year' feature
-        df_arrests['num_fel_arrests_last_year'] = df_arrests.apply(
-            lambda row: df_arrests[
-                (df_arrests['person_id'] == row['person_id']) &
-                (df_arrests['arrest_date_event'] < row['arrest_date_univ']) &
-                (df_arrests['arrest_date_event'] >= row['arrest_date_univ'] - pd.DateOffset(days=365)) &
-                (df_arrests['charge_event'] == 'felony')
-            ].shape[0],
-            axis=1
-        )
-
-        # Calculate the average number of felony arrests in the last year
-        avg_felony_arrests_last_year = df_arrests['num_fel_arrests_last_year'].mean()
-        print(f"What is the average number of felony arrests in the last year? {avg_felony_arrests_last_year:.2f}")
-
-        # Print the mean of 'num_fel_arrests_last_year'
-        print(f"Mean of 'num_fel_arrests_last_year': {df_arrests['num_fel_arrests_last_year'].mean():.2f}")
-
-        # Print the first few rows of the dataframe
-        print(df_arrests.head())
-
-        return df_arrests
-
-if __name__ == "__main__":
+def preprocessing():
     pred_universe_df = pd.read_csv('./data/pred_universe_raw.csv')
     arrest_events_df = pd.read_csv('./data/arrest_events_raw.csv')
-    preprocessing_instance = Preprocessing()
-    df_arrests = preprocessing_instance.process(pred_universe_df, arrest_events_df)
+
+    # Perform preprocessing
+    df_arrests = pd.merge(pred_universe_df, arrest_events_df, on='person_id', how='outer', suffixes=('_universe', '_event'))
+
+    df_arrests['arrest_date_univ'] = pd.to_datetime(df_arrests['arrest_date_univ'])
+    df_arrests['arrest_date_event'] = pd.to_datetime(df_arrests['arrest_date_event'])
+
+    df_arrests['y'] = df_arrests.apply(
+        lambda row: 1 if (
+            row['arrest_date_event'] > row['arrest_date_univ'] and
+            row['arrest_date_event'] <= row['arrest_date_univ'] + pd.DateOffset(days=365) and
+            row['charge_event'] == 'felony'
+        ) else 0,
+        axis=1
+    )
+
+    df_arrests['current_charge_felony'] = df_arrests['charge_universe'].apply(lambda x: 1 if x == 'felony' else 0)
+    df_arrests['num_fel_arrests_last_year'] = df_arrests.apply(
+        lambda row: df_arrests[
+            (df_arrests['person_id'] == row['person_id']) &
+            (df_arrests['arrest_date_event'] < row['arrest_date_univ']) &
+            (df_arrests['arrest_date_event'] >= row['arrest_date_univ'] - pd.DateOffset(days=365)) &
+            (df_arrests['charge_event'] == 'felony')
+        ].shape[0],
+        axis=1
+    )
+
+    share_felony_rearrested = df_arrests['y'].mean()
+    print(f"What share of arrestees in the df_arrests table were rearrested for a felony crime in the next year? {share_felony_rearrested:.4f}")
+
+    share_felony_current_charge = df_arrests['current_charge_felony'].mean()
+    print(f"What share of current charges are felonies? {share_felony_current_charge:.4f}")
+
+    avg_felony_arrests_last_year = df_arrests['num_fel_arrests_last_year'].mean()
+    print(f"What is the average number of felony arrests in the last year? {avg_felony_arrests_last_year:.2f}")
+
     df_arrests.to_csv('./data/df_arrests.csv', index=False)
+
+    return df_arrests
+
 
 
