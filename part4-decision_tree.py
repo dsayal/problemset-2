@@ -17,6 +17,15 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 
 def decision_tree(df_arrests):
+    """This function fits a Decision Tree classifier to the provided dataset and performs hyperparameter tuning using GridSearchCV. It evaluates the model's performance and updates the DataFrame with predictions.
+
+Arguments:
+    df_arrests (pd.DataFrame): The DataFrame containing the dataset with features and target variable.
+
+Returns:
+    pd.DataFrame: The updated DataFrame with Decision Tree predictions added.
+
+"""
     if 'pred_universe' not in df_arrests.columns or 'num_fel_arrests_last_year' not in df_arrests.columns:
         print("Error: Required columns are missing from the dataframe.")
         return
@@ -33,7 +42,6 @@ def decision_tree(df_arrests):
     param_grid_dt = {'max_depth': [3, 5, 7]}
     dt_model = DecisionTreeClassifier()
 
-    # Initialize GridSearchCV
     gs_cv_dt = GridSearchCV(
         estimator=dt_model,
         param_grid=param_grid_dt,

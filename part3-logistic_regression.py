@@ -18,6 +18,17 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
 def logistic_regression(df_arrests):
+    """This function performs logistic regression on the provided dataset to predict the target variable `y`. It involves splitting the data, performing hyperparameter tuning with
+       GridSearchCV, and evaluating the model's performance.
+
+Arguments:
+    df_arrests (pd.DataFrame): The DataFrame containing the dataset with features and target variable.
+
+Returns:
+    pd.DataFrame: The updated DataFrame with logistic regression predictions added.
+
+Usage:
+Call this function to fit a logistic regression model, evaluate its performance, and save the predictions for further analysis."""
     if 'pred_universe' not in df_arrests.columns:
         print("Error: 'pred_universe' column is not present in the dataframe.")
         return

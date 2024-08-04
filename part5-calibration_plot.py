@@ -5,7 +5,22 @@ from sklearn.calibration import calibration_curve
 from sklearn.metrics import roc_auc_score
 
 def calibration_plot(df_arrests):
-    # Load the predictions
+    """
+    Generates calibration plots for Logistic Regression and Decision Tree models, 
+    and computes additional metrics to evaluate model performance.
+
+    Args:
+       df_arrests (pd.DataFrame): DataFrame containing the true labels and predicted probabilities 
+                                   for both Logistic Regression and Decision Tree models. 
+                                   Must include the following columns:
+                                   - 'y': True labels.
+                                   - 'pred_lr': Predicted probabilities from the Logistic Regression model.
+                                   - 'pred_dt': Predicted probabilities from the Decision Tree model.
+
+    Returns:
+      None: This function displays calibration plots and prints metrics to the console.
+    """
+
     y_true = df_arrests['y']
     y_prob_lr = df_arrests['pred_lr']
     y_prob_dt = df_arrests['pred_dt']

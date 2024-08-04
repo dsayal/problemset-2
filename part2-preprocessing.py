@@ -19,6 +19,11 @@ PART 2: Pre-processing
 import pandas as pd
 
 def preprocessing():
+    """This function processes and prepares the raw datasets for analysis by performing the following steps:
+
+Returns:
+    pd.DataFrame: The processed DataFrame with additional features and merged data.
+    """
     # Load datasets
     pred_universe_df = pd.read_csv('./data/pred_universe_raw.csv')
     arrest_events_df = pd.read_csv('./data/arrest_events_raw.csv')
