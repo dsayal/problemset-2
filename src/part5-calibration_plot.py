@@ -11,7 +11,6 @@ Compute AUC for the logistic regression model
 Compute AUC for the decision tree model
 Do both metrics agree that one model is more accurate than the other? Print this question and your answer. 
 '''
-
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -44,7 +43,9 @@ def calibration_plot(df_arrests):
         # Get top 50 predicted risk scores
         top_50_idx = y_prob.nlargest(50).index
         y_true_top_50 = y_true.loc[top_50_idx]
-        ppv = y_true_top_50.mean()
+        tp = y_true_top_50.sum()  # True Positives
+        fp = len(y_true_top_50) - tp  # False Positives
+        ppv = tp / (tp + fp) if (tp + fp) > 0 else 0
         return ppv
 
     ppv_lr = compute_ppv(y_true, y_prob_lr)
@@ -57,7 +58,7 @@ def calibration_plot(df_arrests):
     print(f"AUC for Logistic Regression: {auc_lr:.4f}")
     print(f"AUC for Decision Tree: {auc_dt:.4f}")
 
-    # Compare models
+    # Compare models for calibration
     better_model = "Logistic Regression" if auc_lr > auc_dt else "Decision Tree"
     print(f"Which model is more calibrated? The model with the higher AUC: {better_model}")
 
@@ -71,7 +72,6 @@ def calibration_plot(df_arrests):
 
     print(f"Do both metrics agree that one model is more accurate than the other? {ppv_comparison}")
 
-# Example usage:
-# df_arrests = pd.read_csv('./data/df_arrests_with_dt_predictions.csv')
+# Call the function with your dataframe
 # calibration_plot(df_arrests)
 

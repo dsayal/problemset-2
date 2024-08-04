@@ -18,8 +18,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
 def logistic_regression(df_arrests):
-    # Ensure the features are correctly defined
-    # Ensure `pred_universe` is actually a column in the df_arrests or update this accordingly
     if 'pred_universe' not in df_arrests.columns:
         print("Error: 'pred_universe' column is not present in the dataframe.")
         return

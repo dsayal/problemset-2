@@ -2,12 +2,11 @@
 PART 1: ETL the two datasets and save each in `data/` as .csv's
 '''
 
-
 import pandas as pd
 import os
 
 def etl():
-    # Ensure the output directory exists
+
     os.makedirs('./data', exist_ok=True)
 
     # Load data

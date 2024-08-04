@@ -17,7 +17,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 
 def decision_tree(df_arrests):
-    # Check if required columns exist
     if 'pred_universe' not in df_arrests.columns or 'num_fel_arrests_last_year' not in df_arrests.columns:
         print("Error: Required columns are missing from the dataframe.")
         return
