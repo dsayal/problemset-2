@@ -1,11 +1,12 @@
 '''
 You will run this problem set from main.py, so set things up accordingly
 '''
-from part1_etl import etl
-from part2_preprocessing import preprocessing
-from part3_logistic_regression import logistic_regression
-from part4_decision_tree import decision_tree
-from part5_calibration_plot import calibration_plot
+
+import etl
+import preprocessing
+import logistic_regression
+import decision_tree
+import calibration_plot
 
 def main():
     # PART 1: Instantiate ETL, saving the two datasets in `./data/`

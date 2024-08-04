@@ -1,21 +1,8 @@
-'''
-PART 5: Calibration-light
-Use `calibration_plot` function to create a calibration curve for the logistic regression model. Set `n_bins` to 5. (The calibration plot may have less than 5 points, that's ok) 
-Use `calibration_plot` function to create a calibration curve for the decision tree model. Set `n_bins` to 5. (The calibration plot may have less than 5 points, that's ok) 
-Which model is more calibrated? Print this question and your answer. 
-
-Extra Credit
-Compute  PPV for the logistic regression model for arrestees ranked in the top 50 for predicted risk
-Compute  PPV for the decision tree model for arrestees ranked in the top 50 for predicted risk
-Compute AUC for the logistic regression model
-Compute AUC for the decision tree model
-Do both metrics agree that one model is more accurate than the other? Print this question and your answer. 
-'''
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.calibration import calibration_curve
-from sklearn.metrics import precision_recall_curve, roc_auc_score
+from sklearn.metrics import roc_auc_score
 
 def calibration_plot(df_arrests):
     # Load the predictions
@@ -72,6 +59,5 @@ def calibration_plot(df_arrests):
 
     print(f"Do both metrics agree that one model is more accurate than the other? {ppv_comparison}")
 
-# Call the function with your dataframe
-# calibration_plot(df_arrests)
+
 
